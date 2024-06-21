@@ -1,8 +1,8 @@
 import nest_asyncio
 from PyPDF2 import PdfReader
 from langchain.text_splitter import CharacterTextSplitter
-from langchain.embeddings import HuggingFaceInstructEmbeddings
-from langchain.vectorstores import FAISS
+from InstructorEmbedding import INSTRUCTOR
+from langchain_community.vectorstores import FAISS
 
 
 nest_asyncio.apply()
@@ -34,7 +34,7 @@ def get_text_chunks(raw_text):
 
 
 def get_vector_store(chunks):
-    intructor_embedding = HuggingFaceInstructEmbeddings(model_name='hkunlp/instructor-xl')  
+    intructor_embedding = INSTRUCTOR('hkunlp/instructor-xl')  
     vectorstore = FAISS.from_texts(texts=chunks, embedding=intructor_embedding)
     return vectorstore
 
