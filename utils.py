@@ -1,8 +1,13 @@
 import nest_asyncio
 from PyPDF2 import PdfReader
-from langchain.text_splitter import CharacterTextSplitter
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from InstructorEmbedding import INSTRUCTOR
-from langchain_community.vectorstores import FAISS
+from langchain.embeddings import SentenceTransformerEmbeddings
+from langchain.vectorstores import Chroma
+from langchain.memory import ConversationBufferMemory
+from langchain.chains import ConversationalRetrievalChain
+from langchain.llms import HuggingFaceHub
+
 
 
 nest_asyncio.apply()
@@ -18,28 +23,34 @@ def get_pdf_text(pdf_docs):
 
     return raw_text
 
-
-
-
 def get_text_chunks(raw_text):
-    text_splitter = CharacterTextSplitter(
-        separator="\n",
+    text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000,
         chunk_overlap=200,
         length_function=len
     )
-
     chunks = text_splitter.split_text(raw_text)
     return chunks
 
 
-def get_vector_store(chunks):
-    intructor_embedding = INSTRUCTOR('hkunlp/instructor-xl')  
-    vectorstore = FAISS.from_texts(texts=chunks, embedding=intructor_embedding)
+def get_vector_store(chunks): 
+    embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+    vectorstore = Chroma.from_texts(chunks, embeddings)
     return vectorstore
 
 
 
+def get_conversation_chain(vectorstore):
+    
+    llm = HuggingFaceHub(repo_id="google/flan-t5-xxl", model_kwargs={"temperature":0.5, "max_length":512})
+
+    memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
+    conversation_chain = ConversationalRetrievalChain.from_llm(
+        llm=llm,
+        retriever=vectorstore.as_retriever(),
+        memory=memory
+    )
+    return conversation_chain
 
 
 

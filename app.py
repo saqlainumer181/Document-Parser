@@ -2,7 +2,8 @@
 from utils import *
 import streamlit as st
 from dotenv import load_dotenv
-
+from groq import Groq
+import os
 
 
 def main():
@@ -10,6 +11,11 @@ def main():
 
     st.set_page_config(page_title="PDF Parser",
                        page_icon=":books:")
+    
+    if "conversation" not in st.session_state:
+        st.session_state.conversation = None
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = None
     
     st.header("PDF Chatbot :books:")
     user_question = st.text_input("Ask a question about your documents:")
@@ -27,13 +33,11 @@ def main():
 
                 vector_store = get_vector_store(text_chunks)
 
-
-
-    # for multiple files
-    # documents = parser.load_data(["./my_file1.pdf", "./my_file2.pdf"])
+                st.session_state.conversation = get_conversation_chain(vector_store)
 
 
 
+    
 
 
 
