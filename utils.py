@@ -1,36 +1,21 @@
 import nest_asyncio
 from PyPDF2 import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from InstructorEmbedding import INSTRUCTOR
 from langchain.embeddings import SentenceTransformerEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationalRetrievalChain
 from langchain.llms import HuggingFaceHub
+from unstructured.partition.pdf import partition_pdf
 
 
 
 nest_asyncio.apply()
 
+def get_pdf_chunks(filename):
+    elements = partition_pdf(filename=filename, extract_images_in_pdf=False,
+                             strategy="hi_red", languages=[])
 
-def get_pdf_text(pdf_docs):
-    raw_text = ""
-
-    for pdf in pdf_docs:
-        pdf_reader = PdfReader(pdf)
-        for page in pdf_reader.pages:
-            raw_text += page.extract_text()
-
-    return raw_text
-
-def get_text_chunks(raw_text):
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1000,
-        chunk_overlap=200,
-        length_function=len
-    )
-    chunks = text_splitter.split_text(raw_text)
-    return chunks
 
 
 def get_vector_store(chunks): 

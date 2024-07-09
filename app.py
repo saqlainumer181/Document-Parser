@@ -6,6 +6,7 @@ from groq import Groq
 import os
 
 
+
 def main():
     load_dotenv()
 
@@ -21,15 +22,13 @@ def main():
     user_question = st.text_input("Ask a question about your documents:")
     with st.sidebar:
         st.subheader("Your documents")
-        pdf_docs = st.file_uploader(
+        pdf_path = st.file_uploader(
             "Upload your PDFs here and click on 'Process'", accept_multiple_files=True)
         
         if st.button("Process"):
             with st.spinner("Processing"):
-                # get pdf text
-                raw_text = get_pdf_text(pdf_docs)
 
-                text_chunks = get_text_chunks(raw_text)
+                text_chunks = get_pdf_chunks(pdf_path)
 
                 vector_store = get_vector_store(text_chunks)
 
