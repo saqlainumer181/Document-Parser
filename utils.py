@@ -8,13 +8,20 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain.llms import HuggingFaceHub
 from unstructured.partition.pdf import partition_pdf
 
+import pytesseract
+pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'  # Adjust path if necessary
+
 
 
 nest_asyncio.apply()
 
 def get_pdf_chunks(filename):
     elements = partition_pdf(filename=filename, extract_images_in_pdf=False,
-                             strategy="hi_red", languages=[])
+                             strategy="hi_red", ocr_languages=['eng', 'chi_sim'],
+                             hi_res_model_name="yolox", infer_table_structure=True,
+                             )
+    
+    return elements
 
 
 
